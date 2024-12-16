@@ -25,12 +25,23 @@ pipeline {
                 }
             }
         }
-        stage('Deploy Container') {
+        stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh 'docker run -d -p 8080:8080 ${DOCKER_IMAGE}'
+                    // Start Minikube and set context
+                    sh 'minikube start --driver=docker'
+                    sh 'kubectl config use-context minikube'
+                    
+                    // Create Kubernetes deployment and service
+                    sh 'kubectl apply -f deployment.yaml'
+                    sh 'kubectl apply -f service.yaml'
+
+                    // Verify that pods and services are running
+                    sh 'kubectl get pods'
+                    sh 'kubectl get services'
                 }
             }
         }
     }
 }
+
